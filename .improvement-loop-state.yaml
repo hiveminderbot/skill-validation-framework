@@ -1,0 +1,6 @@
+# Skill Validation Framework - Improvement Loop State
+# This file tracks in-progress work to prevent concurrent tasks
+
+in_progress: null
+last_check: null
+completed_tasks: []
