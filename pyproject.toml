@@ -39,6 +39,14 @@ dev = [
     "ruff>=0.1.0",
     "mypy>=1.0",
 ]
+security = [
+    "bandit>=1.7.0",
+    "safety>=2.0",
+]
+all = [
+    "bandit>=1.7.0",
+    "safety>=2.0",
+]
 
 [project.scripts]
 skill-validate = "skill_validation.cli:main"

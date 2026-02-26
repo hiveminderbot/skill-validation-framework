@@ -120,9 +120,49 @@ class SecurityScanner:
         }
 
 
-def scan_skill(skill_path: Path) -> tuple[list[SecurityIssue], dict]:
-    """Convenience function to scan a skill."""
+def scan_skill(
+    skill_path: Path,
+    use_third_party: bool = False,
+    third_party_scanners: list[str] | None = None,
+) -> tuple[list[SecurityIssue], dict]:
+    """Convenience function to scan a skill.
+
+    Args:
+        skill_path: Path to the skill directory
+        use_third_party: Whether to run third-party scanners
+        third_party_scanners: List of specific scanners to use (None = all available)
+
+    Returns:
+        Tuple of (issues list, summary dict)
+    """
     scanner = SecurityScanner(skill_path)
     issues = scanner.scan()
     summary = scanner.get_summary()
+
+    # Run third-party scanners if requested
+    if use_third_party:
+        from skill_validation.security.third_party import ThirdPartyScannerManager
+
+        manager = ThirdPartyScannerManager(skill_path)
+
+        # Determine which scanners to run
+        scanners_to_run = third_party_scanners or manager.get_available_scanners()
+
+        for scanner_name in scanners_to_run:
+            if manager.register_scanner(scanner_name):
+                third_party_issues = manager.scanners[scanner_name].scan()
+                issues.extend(third_party_issues)
+
+        # Recalculate summary with third-party results
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for issue in issues:
+            severity_counts[issue.severity] = severity_counts.get(issue.severity, 0) + 1
+
+        summary = {
+            "total_issues": len(issues),
+            "severity_counts": severity_counts,
+            "passed": len(issues) == 0,
+            "third_party_scanners": list(manager.scanners.keys()),
+        }
+
     return issues, summary

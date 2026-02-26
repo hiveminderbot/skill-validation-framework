@@ -23,11 +23,20 @@ def cli():
 @cli.command()
 @click.argument("skill_path", type=click.Path(exists=True, path_type=Path))
 @click.option("--format", "output_format", type=click.Choice(["text", "json"]), default="text")
-def security(skill_path: Path, output_format: str):
+@click.option("--third-party", "use_third_party", is_flag=True, help="Run third-party scanners")
+@click.option(
+    "--scanner",
+    "scanners",
+    multiple=True,
+    type=click.Choice(["bandit", "gitleaks", "safety"]),
+    help="Specific third-party scanner to use (can be used multiple times)",
+)
+def security(skill_path: Path, output_format: str, use_third_party: bool, scanners: tuple[str, ...]):
     """Run security scan on a skill."""
     console.print(f"[bold]Scanning {skill_path} for security issues...[/bold]")
 
-    issues, summary = scan_skill(skill_path)
+    third_party_list = list(scanners) if scanners else None
+    issues, summary = scan_skill(skill_path, use_third_party, third_party_list)
 
     if output_format == "json":
         import json
@@ -73,6 +82,9 @@ def security(skill_path: Path, output_format: str):
 
         console.print(f"\nTotal issues: {summary['total_issues']}")
         console.print(f"Passed: {summary['passed']}")
+
+        if summary.get("third_party_scanners"):
+            console.print(f"Third-party scanners used: {', '.join(summary['third_party_scanners'])}")
 
 
 @cli.command()
