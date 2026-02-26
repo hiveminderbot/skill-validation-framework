@@ -1,10 +1,9 @@
 """Benchmark runner for OpenClaw skills."""
 
-import json
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -106,7 +105,7 @@ class BenchmarkRunner:
     def _benchmark_parse(self) -> bool:
         """Benchmark metadata parsing."""
         try:
-            import yaml
+            import yaml  # type: ignore[import-untyped]
 
             skill_md = self.skill_path / "SKILL.md"
             if not skill_md.exists():

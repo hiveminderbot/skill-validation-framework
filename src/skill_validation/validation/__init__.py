@@ -3,9 +3,9 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 
 @dataclass
@@ -92,7 +92,7 @@ class SkillValidator:
             )
         )
 
-        if has_frontmatter:
+        if has_frontmatter and frontmatter_match:
             try:
                 metadata = yaml.safe_load(frontmatter_match.group(1))
                 self.skill_metadata = metadata

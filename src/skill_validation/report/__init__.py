@@ -1,10 +1,9 @@
 """Report generator for skill validation results."""
 
-import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -90,7 +89,8 @@ class ReportGenerator:
             bench_rate = f"{report.benchmark_summary.get('success_rate', 0):.0%}"
 
             lines.append(
-                f"| {report.skill_name} | {report.overall_score:.1f} | {sec_pass} | {val_rate} | {bench_rate} |"
+                f"| {report.skill_name} | {report.overall_score:.1f} | "
+                f"{sec_pass} | {val_rate} | {bench_rate} |"
             )
 
         lines.extend(

@@ -1,11 +1,11 @@
 """Third-party security scanner integrations."""
 
 import json
+import os
 import subprocess
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from skill_validation.security import SecurityIssue
 
@@ -93,7 +93,8 @@ class BanditScanner(ThirdPartyScanner):
         cmd = [
             "bandit",
             "-r",  # recursive
-            "-f", "json",  # JSON output
+            "-f",
+            "json",  # JSON output
             "-ll",  # severity level (low and above)
             str(self.skill_path),
         ]
@@ -170,9 +171,12 @@ class GitleaksScanner(ThirdPartyScanner):
         cmd = [
             "gitleaks",
             "detect",
-            "-s", str(self.skill_path),
-            "-f", "json",
-            "-r", "/dev/stdout" if subprocess.os.name != "nt" else "CON",
+            "-s",
+            str(self.skill_path),
+            "-f",
+            "json",
+            "-r",
+            "/dev/stdout" if os.name != "nt" else "CON",
             "--no-git",  # Don't scan git history, just files
             "-v",  # verbose
         ]
@@ -255,7 +259,8 @@ class SafetyScanner(ThirdPartyScanner):
             cmd = [
                 "safety",
                 "check",
-                "--file", str(req_file),
+                "--file",
+                str(req_file),
                 "--json",
             ]
 
@@ -272,8 +277,14 @@ class SafetyScanner(ThirdPartyScanner):
                         category="dependency",
                         file=req_file.relative_to(self.skill_path),
                         line=0,
-                        message=f"{vuln.get('vulnerability_id', 'Unknown')}: {vuln.get('advisory', 'No details')}",
-                        snippet=f"{vuln.get('package_name', 'unknown')} {vuln.get('vulnerable_spec', '')}",
+                        message=(
+                            f"{vuln.get('vulnerability_id', 'Unknown')}: "
+                            f"{vuln.get('advisory', 'No details')[:50]}"
+                        ),
+                        snippet=(
+                            f"{vuln.get('package_name', 'unknown')} "
+                            f"{vuln.get('vulnerable_spec', '')}"
+                        ),
                     )
                     self.issues.append(security_issue)
             except (json.JSONDecodeError, KeyError, ValueError):
@@ -297,7 +308,7 @@ class SafetyScanner(ThirdPartyScanner):
 class ThirdPartyScannerManager:
     """Manages multiple third-party scanners."""
 
-    SCANNERS = {
+    SCANNERS: dict[str, type[ThirdPartyScanner]] = {
         "bandit": BanditScanner,
         "gitleaks": GitleaksScanner,
         "safety": SafetyScanner,

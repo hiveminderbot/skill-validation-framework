@@ -3,7 +3,7 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import Any
 
 
 @dataclass
@@ -21,8 +21,8 @@ class SecurityIssue:
 class SecurityScanner:
     """Scans skills for security issues."""
 
-    # Patterns to detect
-    PATTERNS = {
+    # Patterns to detect - using explicit type to help mypy
+    PATTERNS: dict[str, dict[str, Any]] = {
         "secret": {
             "severity": "critical",
             "patterns": [
@@ -79,7 +79,20 @@ class SecurityScanner:
         """Determine if a file should be scanned."""
         # Skip binary files and common non-code files
         skip_extensions = {".png", ".jpg", ".jpeg", ".gif", ".ico", ".ttf", ".woff", ".woff2"}
-        return file_path.suffix not in skip_extensions
+        if file_path.suffix in skip_extensions:
+            return False
+
+        # Skip test files (they often contain intentional examples of patterns)
+        skip_patterns = [
+            "/test_",  # Test files in a directory
+            "_test.py",  # Files ending with _test.py
+            "/tests/",  # Tests directories
+            "__pycache__",  # Python cache
+            ".pyc",  # Compiled Python
+            ".git/",  # Git directory
+        ]
+        path_str = str(file_path)
+        return all(pattern not in path_str for pattern in skip_patterns)
 
     def _scan_file(self, file_path: Path) -> None:
         """Scan a single file for security issues."""

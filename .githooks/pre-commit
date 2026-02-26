@@ -1,0 +1,23 @@
+#!/bin/sh
+# Pre-commit hook for skill-validation-framework
+# Runs self-validation before allowing commits
+
+echo "Running skill validation framework self-checks..."
+
+# Get the directory where this script is located
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(dirname "$HOOK_DIR")"
+
+# Run self-validation
+python3 "$PROJECT_ROOT/scripts/self_validate.py"
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Self-validation failed! Please fix the issues before committing."
+    echo "   Run 'python scripts/self_validate.py' for details."
+    exit 1
+fi
+
+echo ""
+echo "✅ Self-validation passed!"
+exit 0

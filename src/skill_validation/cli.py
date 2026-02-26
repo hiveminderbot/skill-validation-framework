@@ -31,7 +31,9 @@ def cli():
     type=click.Choice(["bandit", "gitleaks", "safety"]),
     help="Specific third-party scanner to use (can be used multiple times)",
 )
-def security(skill_path: Path, output_format: str, use_third_party: bool, scanners: tuple[str, ...]):
+def security(
+    skill_path: Path, output_format: str, use_third_party: bool, scanners: tuple[str, ...]
+):
     """Run security scan on a skill."""
     console.print(f"[bold]Scanning {skill_path} for security issues...[/bold]")
 
@@ -84,7 +86,9 @@ def security(skill_path: Path, output_format: str, use_third_party: bool, scanne
         console.print(f"Passed: {summary['passed']}")
 
         if summary.get("third_party_scanners"):
-            console.print(f"Third-party scanners used: {', '.join(summary['third_party_scanners'])}")
+            console.print(
+                f"Third-party scanners used: {', '.join(summary['third_party_scanners'])}"
+            )
 
 
 @cli.command()
