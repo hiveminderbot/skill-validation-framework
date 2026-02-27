@@ -48,18 +48,20 @@ class TestBanditScanner:
         test_file = tmp_path / "test.py"
         test_file.write_text("os.system(cmd)\n")
 
-        mock_output = json.dumps({
-            "results": [
-                {
-                    "issue_severity": "HIGH",
-                    "test_id": "B605",
-                    "filename": str(test_file.resolve()),
-                    "line_number": 10,
-                    "issue_text": "Possible shell injection",
-                    "code": "os.system(cmd)",
-                }
-            ]
-        })
+        mock_output = json.dumps(
+            {
+                "results": [
+                    {
+                        "issue_severity": "HIGH",
+                        "test_id": "B605",
+                        "filename": str(test_file.resolve()),
+                        "line_number": 10,
+                        "issue_text": "Possible shell injection",
+                        "code": "os.system(cmd)",
+                    }
+                ]
+            }
+        )
 
         # Mock _run_command to simulate bandit being available and returning results
         with patch.object(scanner, "_run_command") as mock_run:
@@ -104,12 +106,14 @@ class TestGitleaksScanner:
         config_file = tmp_path / "config.py"
         config_file.write_text("AKIAIOSFODNN7EXAMPLE\n")
 
-        mock_output = json.dumps({
-            "File": str(config_file.resolve()),
-            "StartLine": 5,
-            "Description": "AWS Access Key",
-            "Match": "AKIAIOSFODNN7EXAMPLE",
-        })
+        mock_output = json.dumps(
+            {
+                "File": str(config_file.resolve()),
+                "StartLine": 5,
+                "Description": "AWS Access Key",
+                "Match": "AKIAIOSFODNN7EXAMPLE",
+            }
+        )
 
         # Mock _run_command to simulate gitleaks being available and returning results
         with patch.object(scanner, "_run_command") as mock_run:
@@ -148,17 +152,19 @@ class TestSafetyScanner:
 
         scanner = SafetyScanner(tmp_path)
 
-        mock_output = json.dumps({
-            "vulnerabilities": [
-                {
-                    "vulnerability_id": "CVE-2018-18074",
-                    "cvssv3_score": 9.8,
-                    "advisory": "Requests vulnerability",
-                    "package_name": "requests",
-                    "vulnerable_spec": "<2.20.0",
-                }
-            ]
-        })
+        mock_output = json.dumps(
+            {
+                "vulnerabilities": [
+                    {
+                        "vulnerability_id": "CVE-2018-18074",
+                        "cvssv3_score": 9.8,
+                        "advisory": "Requests vulnerability",
+                        "package_name": "requests",
+                        "vulnerable_spec": "<2.20.0",
+                    }
+                ]
+            }
+        )
 
         with patch.object(scanner, "_run_command") as mock_run:
             mock_run.return_value = MagicMock(returncode=0, stdout=mock_output)

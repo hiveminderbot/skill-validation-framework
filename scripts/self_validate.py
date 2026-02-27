@@ -48,15 +48,17 @@ def main() -> int:
     issues, summary = scan_skill(project_root, use_third_party=True)
 
     print(f"  Total issues: {summary['total_issues']}")
-    print(f"  Severity: critical={summary['severity_counts'].get('critical', 0)}, "
-          f"high={summary['severity_counts'].get('high', 0)}, "
-          f"medium={summary['severity_counts'].get('medium', 0)}, "
-          f"low={summary['severity_counts'].get('low', 0)}")
+    print(
+        f"  Severity: critical={summary['severity_counts'].get('critical', 0)}, "
+        f"high={summary['severity_counts'].get('high', 0)}, "
+        f"medium={summary['severity_counts'].get('medium', 0)}, "
+        f"low={summary['severity_counts'].get('low', 0)}"
+    )
 
-    if summary['severity_counts'].get('critical', 0) > 0:
+    if summary["severity_counts"].get("critical", 0) > 0:
         print("  ❌ FAILED: Critical security issues found!")
         security_passed = False
-    elif summary['severity_counts'].get('high', 0) > 0:
+    elif summary["severity_counts"].get("high", 0) > 0:
         print("  ⚠️  WARNING: High severity issues found")
         security_passed = True  # Allow high for now
     else:
@@ -77,7 +79,7 @@ def main() -> int:
     print(f"  Failed: {val_summary['failed']}")
     print(f"  Pass rate: {val_summary['pass_rate']:.1%}")
 
-    if val_summary['pass_rate'] >= 0.8:
+    if val_summary["pass_rate"] >= 0.8:
         print("  ✅ PASSED")
         validation_passed = True
     else:
@@ -97,7 +99,7 @@ def main() -> int:
     print(f"  Success rate: {bench_summary['success_rate']:.1%}")
     print(f"  Avg duration: {bench_summary['avg_duration_ms']:.1f}ms")
 
-    if bench_summary['success_rate'] >= 0.8:
+    if bench_summary["success_rate"] >= 0.8:
         print("  ✅ PASSED")
         benchmark_passed = True
     else:
