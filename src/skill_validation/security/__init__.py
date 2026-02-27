@@ -78,9 +78,53 @@ class SecurityScanner:
     def _should_scan(self, file_path: Path) -> bool:
         """Determine if a file should be scanned."""
         # Skip binary files and common non-code files
-        skip_extensions = {".png", ".jpg", ".jpeg", ".gif", ".ico", ".ttf", ".woff", ".woff2"}
+        skip_extensions = {
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".gif",
+            ".ico",
+            ".ttf",
+            ".woff",
+            ".woff2",
+            ".mp3",
+            ".mp4",
+            ".avi",
+            ".mov",
+            ".zip",
+            ".tar",
+            ".gz",
+            ".bz2",
+            ".7z",
+            ".rar",
+            ".exe",
+            ".dll",
+            ".so",
+            ".dylib",
+        }
         if file_path.suffix in skip_extensions:
             return False
+
+        # Skip directories that don't need scanning
+        skip_dirs = [
+            ".git/",
+            ".venv/",
+            "venv/",
+            "__pycache__/",
+            ".pytest_cache/",
+            ".mypy_cache/",
+            ".ruff_cache/",
+            "node_modules/",
+            ".tox/",
+            "dist/",
+            "build/",
+            ".egg-info/",
+        ]
+
+        path_str = str(file_path)
+        for skip_dir in skip_dirs:
+            if skip_dir in path_str:
+                return False
 
         # Skip test files (they often contain intentional examples of patterns)
         # Use word boundaries to avoid matching pytest temp dirs like /tmp/pytest-*/test_*
@@ -88,23 +132,18 @@ class SecurityScanner:
             "/test_",  # Test files in a directory (but not pytest temp dirs)
             "_test.py",  # Files ending with _test.py
             "/tests/",  # Tests directories
-            "__pycache__",  # Python cache
             ".pyc",  # Compiled Python
-            ".git/",  # Git directory
         ]
-        path_str = str(file_path)
-        
-        # Special case: don't skip files in pytest temp directories that happen to have 'test' in path
-        # Pytest uses /tmp/pytest-of-*/pytest-*/test_*/ pattern
+
+        # Special case: don't skip files in pytest temp directories that happen
+        # to have 'test' in path. Pytest uses /tmp/pytest-of-*/pytest-*/test_*/
         if "/pytest-of-" in path_str and "/pytest-" in path_str:
             # This is a pytest temp directory, check only the actual filename
             filename = file_path.name
             if filename.startswith("test_") or filename.endswith("_test.py"):
                 return False
-            if file_path.suffix in {".pyc"}:
-                return False
-            return True
-        
+            return file_path.suffix not in {".pyc"}
+
         return all(pattern not in path_str for pattern in skip_patterns)
 
     def _scan_file(self, file_path: Path) -> None:

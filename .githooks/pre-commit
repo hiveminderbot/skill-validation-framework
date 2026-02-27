@@ -8,13 +8,20 @@ echo "Running skill validation framework self-checks..."
 HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(dirname "$HOOK_DIR")"
 
-# Run self-validation
-python3 "$PROJECT_ROOT/scripts/self_validate.py"
+# Run self-validation using uv if available, fallback to python3
+if command -v uv >/dev/null 2>&1; then
+    uv run python "$PROJECT_ROOT/scripts/self_validate.py"
+elif command -v python3 >/dev/null 2>&1; then
+    python3 "$PROJECT_ROOT/scripts/self_validate.py"
+else
+    echo "❌ Neither uv nor python3 found. Please install uv: https://docs.astral.sh/uv/"
+    exit 1
+fi
 
 if [ $? -ne 0 ]; then
     echo ""
     echo "❌ Self-validation failed! Please fix the issues before committing."
-    echo "   Run 'python scripts/self_validate.py' for details."
+    echo "   Run 'uv run python scripts/self_validate.py' for details."
     exit 1
 fi
 

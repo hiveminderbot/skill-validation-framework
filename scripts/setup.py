@@ -1,4 +1,13 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "pyyaml>=6.0",
+#     "click>=8.0",
+#     "rich>=13.0",
+#     "pydantic>=2.0",
+# ]
+# ///
 """Setup script for skill-validation-framework development environment."""
 
 import subprocess
@@ -29,16 +38,32 @@ def setup_git_hooks() -> bool:
 
 
 def install_dependencies() -> bool:
-    """Install development dependencies."""
+    """Install development dependencies using uv."""
     project_root = Path(__file__).parent.parent
 
     try:
-        subprocess.run(
-            [sys.executable, "-m", "pip", "install", "-e", ".[dev,security]"],
-            cwd=project_root,
-            check=True,
+        # Check if uv is available
+        result = subprocess.run(
+            ["uv", "--version"],
+            capture_output=True,
+            text=True,
         )
-        print("✅ Development dependencies installed")
+        if result.returncode == 0:
+            # Use uv
+            subprocess.run(
+                ["uv", "sync", "--group", "dev", "--group", "security"],
+                cwd=project_root,
+                check=True,
+            )
+            print("✅ Development dependencies installed with uv")
+        else:
+            # Fallback to pip
+            subprocess.run(
+                [sys.executable, "-m", "pip", "install", "-e", ".[dev,security]"],
+                cwd=project_root,
+                check=True,
+            )
+            print("✅ Development dependencies installed with pip")
         return True
     except subprocess.CalledProcessError as e:
         print(f"❌ Failed to install dependencies: {e}")
@@ -69,9 +94,10 @@ def main() -> int:
         print("✅ Setup complete!")
         print()
         print("Next steps:")
-        print("  1. Run 'python scripts/self_validate.py' to verify")
-        print("  2. Make your changes")
-        print("  3. Commit - pre-commit hooks will run automatically")
+        print("  1. Run 'uv run python scripts/self_validate.py' to verify")
+        print("  2. Or: './scripts/self_validate.py' (uses uv shebang)")
+        print("  3. Make your changes")
+        print("  4. Commit - pre-commit hooks will run automatically")
     else:
         print("⚠️  Setup completed with warnings.")
 

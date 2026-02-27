@@ -1,4 +1,13 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "pyyaml>=6.0",
+#     "click>=8.0",
+#     "rich>=13.0",
+#     "pydantic>=2.0",
+# ]
+# ///
 """Improvement Loop for Skill Validation Framework.
 
 This script implements the automated improvement loop that:
@@ -8,7 +17,8 @@ This script implements the automated improvement loop that:
 4. Updates state and releases lock on completion
 
 Usage:
-    python scripts/improvement_loop.py [--dry-run]
+    uv run python scripts/improvement_loop.py [--dry-run]
+    ./scripts/improvement_loop.py [--dry-run]
 """
 
 import argparse

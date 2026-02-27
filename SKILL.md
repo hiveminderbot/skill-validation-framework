@@ -19,17 +19,20 @@ Provide systematic validation for all OpenClaw skills across three layers:
 ## Usage
 
 ```bash
-# Security scan
-python -m skill_validation.security.scanner ./path/to/skill
+# Security scan (using uv)
+uv run python -m skill_validation.security.scanner ./path/to/skill
+
+# Or with python3 directly
+python3 -m skill_validation.security.scanner ./path/to/skill
 
 # Functional validation
-python -m skill_validation.validation.tester ./path/to/skill
+uv run python -m skill_validation.validation.tester ./path/to/skill
 
 # Benchmark
-python -m skill_validation.benchmark.runner ./path/to/skill
+uv run python -m skill_validation.benchmark.runner ./path/to/skill
 
 # Full report
-skill-validate report . --output full-report.md
+uv run skill-validate report . --output full-report.md
 ```
 
 ## Architecture
@@ -78,17 +81,21 @@ skill-validation-framework/
 ## Development
 
 ```bash
-# Setup development environment
-python scripts/setup.py
+# Setup development environment (installs uv if needed)
+python3 scripts/setup.py
+# Or with uv:
+uv run python scripts/setup.py
 
 # Run self-validation
-python scripts/self_validate.py
+uv run python scripts/self_validate.py
+# Or directly (uses uv shebang):
+./scripts/self_validate.py
 
 # Run tests
-pytest
+uv run pytest
 
 # Run with coverage
-pytest --cov=skill_validation --cov-report=term-missing
+uv run pytest --cov=skill_validation --cov-report=term-missing
 ```
 
 ## License
