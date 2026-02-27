@@ -36,12 +36,24 @@ jobs:
           uv run python -m skill_validation.security.scanner . --format json --third-party > security-report.json || true
           cat security-report.json
 
+      - name: Generate SARIF report
+        run: |
+          uv run skill-validate security . --format sarif --third-party --output security-report.sarif || true
+          cat security-report.sarif || echo "SARIF generation completed"
+
       - name: Upload security report
         uses: actions/upload-artifact@v4
         with:
           name: security-report
           path: security-report.json
           retention-days: 30
+
+      - name: Upload SARIF to GitHub Advanced Security
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: security-report.sarif
+          category: skill-validation-framework
 
   code-quality:
     name: Code Quality

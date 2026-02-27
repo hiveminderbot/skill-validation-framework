@@ -22,7 +22,12 @@ def cli():
 
 @cli.command()
 @click.argument("skill_path", type=click.Path(exists=True, path_type=Path))
-@click.option("--format", "output_format", type=click.Choice(["text", "json"]), default="text")
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "sarif"]),
+    default="text",
+)
 @click.option("--third-party", "use_third_party", is_flag=True, help="Run third-party scanners")
 @click.option(
     "--scanner",
@@ -31,8 +36,13 @@ def cli():
     type=click.Choice(["bandit", "gitleaks", "safety"]),
     help="Specific third-party scanner to use (can be used multiple times)",
 )
+@click.option("--output", "output_path", type=click.Path(path_type=Path), default=None)
 def security(
-    skill_path: Path, output_format: str, use_third_party: bool, scanners: tuple[str, ...]
+    skill_path: Path,
+    output_format: str,
+    use_third_party: bool,
+    scanners: tuple[str, ...],
+    output_path: Path | None,
 ):
     """Run security scan on a skill."""
     console.print(f"[bold]Scanning {skill_path} for security issues...[/bold]")
@@ -43,24 +53,39 @@ def security(
     if output_format == "json":
         import json
 
-        console.print(
-            json.dumps(
-                {
-                    "issues": [
-                        {
-                            "severity": i.severity,
-                            "category": i.category,
-                            "file": str(i.file),
-                            "line": i.line,
-                            "message": i.message,
-                        }
-                        for i in issues
-                    ],
-                    "summary": summary,
-                },
-                indent=2,
-            )
+        output = json.dumps(
+            {
+                "issues": [
+                    {
+                        "severity": i.severity,
+                        "category": i.category,
+                        "file": str(i.file),
+                        "line": i.line,
+                        "message": i.message,
+                    }
+                    for i in issues
+                ],
+                "summary": summary,
+            },
+            indent=2,
         )
+        if output_path:
+            output_path.write_text(output)
+            console.print(f"[green]Report saved to {output_path}[/green]")
+        else:
+            console.print(output)
+    elif output_format == "sarif":
+        from skill_validation.report.sarif import SarifGenerator
+
+        generator = SarifGenerator()
+        generator.add_security_issues(issues)
+        sarif_output = generator.to_json(src_root=skill_path)
+
+        if output_path:
+            output_path.write_text(sarif_output)
+            console.print(f"[green]SARIF report saved to {output_path}[/green]")
+        else:
+            console.print(sarif_output)
     else:
         if issues:
             table = Table(title="Security Issues")
@@ -236,4 +261,9 @@ def report(skill_path: Path, compare_path: Path | None, output_path: Path | None
 
 
 if __name__ == "__main__":
+    cli()
+
+
+def main():
+    """Entry point for the CLI."""
     cli()
