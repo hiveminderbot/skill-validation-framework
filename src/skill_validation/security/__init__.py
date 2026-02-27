@@ -83,8 +83,9 @@ class SecurityScanner:
             return False
 
         # Skip test files (they often contain intentional examples of patterns)
+        # Use word boundaries to avoid matching pytest temp dirs like /tmp/pytest-*/test_*
         skip_patterns = [
-            "/test_",  # Test files in a directory
+            "/test_",  # Test files in a directory (but not pytest temp dirs)
             "_test.py",  # Files ending with _test.py
             "/tests/",  # Tests directories
             "__pycache__",  # Python cache
@@ -92,6 +93,18 @@ class SecurityScanner:
             ".git/",  # Git directory
         ]
         path_str = str(file_path)
+        
+        # Special case: don't skip files in pytest temp directories that happen to have 'test' in path
+        # Pytest uses /tmp/pytest-of-*/pytest-*/test_*/ pattern
+        if "/pytest-of-" in path_str and "/pytest-" in path_str:
+            # This is a pytest temp directory, check only the actual filename
+            filename = file_path.name
+            if filename.startswith("test_") or filename.endswith("_test.py"):
+                return False
+            if file_path.suffix in {".pyc"}:
+                return False
+            return True
+        
         return all(pattern not in path_str for pattern in skip_patterns)
 
     def _scan_file(self, file_path: Path) -> None:

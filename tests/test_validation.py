@@ -42,7 +42,7 @@ class TestSecurityScanner:
 
         # Create a file with an API key
         test_file = tmp_path / "config.py"
-        test_file.write_text('API_KEY = "sk-abcdefghijklmnopqrstuvwxyz12345678901234567890"')
+        test_file.write_text('API_KEY = "sk-abcdefghijklmnopqrstuvwxyz123456789012345678"')
 
         issues = scanner.scan()
 
