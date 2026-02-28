@@ -283,7 +283,9 @@ class SarifGenerator:
                     "invocations": [
                         {
                             "executionSuccessful": True,
-                            "startTimeUtc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "startTimeUtc": datetime.now(timezone.utc).strftime(
+                                "%Y-%m-%dT%H:%M:%SZ"
+                            ),
                         }
                     ],
                     "results": self.results,
