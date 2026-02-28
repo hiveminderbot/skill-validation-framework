@@ -1,7 +1,7 @@
 """SARIF output format support for GitHub Advanced Security integration."""
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -283,7 +283,7 @@ class SarifGenerator:
                     "invocations": [
                         {
                             "executionSuccessful": True,
-                            "startTimeUtc": datetime.now().isoformat(),
+                            "startTimeUtc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         }
                     ],
                     "results": self.results,
