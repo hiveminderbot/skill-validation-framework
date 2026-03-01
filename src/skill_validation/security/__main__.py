@@ -20,20 +20,23 @@ def main():
     issues, summary = scan_skill(args.skill_path, use_third_party=args.third_party)
 
     if args.format == "json":
-        output = json.dumps({
-            "issues": [
-                {
-                    "severity": i.severity,
-                    "category": i.category,
-                    "file": str(i.file),
-                    "line": i.line,
-                    "message": i.message,
-                    "snippet": i.snippet,
-                }
-                for i in issues
-            ],
-            "summary": summary,
-        }, indent=2)
+        output = json.dumps(
+            {
+                "issues": [
+                    {
+                        "severity": i.severity,
+                        "category": i.category,
+                        "file": str(i.file),
+                        "line": i.line,
+                        "message": i.message,
+                        "snippet": i.snippet,
+                    }
+                    for i in issues
+                ],
+                "summary": summary,
+            },
+            indent=2,
+        )
     else:
         lines = [f"Security Scan Results for {args.skill_path}", "=" * 50]
         if issues:

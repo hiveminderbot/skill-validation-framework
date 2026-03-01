@@ -19,18 +19,21 @@ def main():
     results, summary = benchmark_skill(args.skill_path)
 
     if args.format == "json":
-        output = json.dumps({
-            "results": [
-                {
-                    "task_name": r.task_name,
-                    "success": r.success,
-                    "duration_ms": r.duration_ms,
-                    "metadata": r.metadata,
-                }
-                for r in results
-            ],
-            "summary": summary,
-        }, indent=2)
+        output = json.dumps(
+            {
+                "results": [
+                    {
+                        "task_name": r.task_name,
+                        "success": r.success,
+                        "duration_ms": r.duration_ms,
+                        "metadata": r.metadata,
+                    }
+                    for r in results
+                ],
+                "summary": summary,
+            },
+            indent=2,
+        )
     else:
         lines = [f"Benchmark Results for {args.skill_path}", "=" * 50]
         for result in results:

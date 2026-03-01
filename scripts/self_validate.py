@@ -42,10 +42,10 @@ def main() -> int:
 
     # Check 1: Security scan on self
     print("[1/4] Running security scan on self...")
-    
+
     # Run the security scanner directly (skip third-party to avoid hangs)
     from skill_validation.security import scan_skill
-    
+
     print("  Scanning (this may take a moment)...")
     issues, summary = scan_skill(project_root, use_third_party=False)
 

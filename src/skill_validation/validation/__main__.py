@@ -19,18 +19,21 @@ def main():
     results, summary = validate_skill(args.skill_path)
 
     if args.format == "json":
-        output = json.dumps({
-            "results": [
-                {
-                    "test_name": r.test_name,
-                    "passed": r.passed,
-                    "message": r.message,
-                    "details": r.details,
-                }
-                for r in results
-            ],
-            "summary": summary,
-        }, indent=2)
+        output = json.dumps(
+            {
+                "results": [
+                    {
+                        "test_name": r.test_name,
+                        "passed": r.passed,
+                        "message": r.message,
+                        "details": r.details,
+                    }
+                    for r in results
+                ],
+                "summary": summary,
+            },
+            indent=2,
+        )
     else:
         lines = [f"Validation Results for {args.skill_path}", "=" * 50]
         for result in results:
