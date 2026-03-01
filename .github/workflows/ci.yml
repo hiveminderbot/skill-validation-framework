@@ -197,10 +197,10 @@ jobs:
         run: uv pip install --system build twine
 
       - name: Build package
-        run: uv run python -m build
+        run: python -m build
 
       - name: Check package with twine
-        run: uv run twine check dist/*
+        run: twine check dist/*
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
