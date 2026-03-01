@@ -33,18 +33,45 @@ skill-validation-framework/
 
 ## Usage
 
+### CLI Commands
+
+The framework provides a unified CLI via the `skill-validate` command:
+
 ```bash
+# Activate virtual environment first
+source .venv/bin/activate
+
 # Security scan
-python -m skill_validation.security.scanner ./path/to/skill
+skill-validate security ./path/to/skill
 
 # Functional validation
-python -m skill_validation.validation.tester ./path/to/skill
+skill-validate validate ./path/to/skill
 
 # Benchmark
-python -m skill_validation.benchmark.runner ./path/to/skill
+skill-validate benchmark ./path/to/skill
 
 # Full report
-python -m skill_validation.report.generator ./path/to/skill --compare ./path/to/other/skill
+skill-validate report ./path/to/skill --compare ./path/to/other/skill
+```
+
+### Alternative: Module Execution
+
+You can also run via Python module:
+
+```bash
+python -m skill_validation security ./path/to/skill
+python -m skill_validation validate ./path/to/skill
+python -m skill_validation benchmark ./path/to/skill
+python -m skill_validation report ./path/to/skill
+```
+
+### JSON Output
+
+Add `--format json` to any command for machine-readable output:
+
+```bash
+skill-validate security ./path/to/skill --format json
+skill-validate validate ./path/to/skill --format json
 ```
 
 ## License
