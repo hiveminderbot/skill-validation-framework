@@ -23,12 +23,16 @@ def main() -> int:
 
     # Output the input data as JSON (for now, just echo)
     # In a real implementation, this would load and execute the skill
-    print(json.dumps({
-        "status": "success",
-        "input_received": input_data,
-        "skill_path": skill_path,
-        "message": "Test runner executed successfully"
-    }))
+    print(
+        json.dumps(
+            {
+                "status": "success",
+                "input_received": input_data,
+                "skill_path": skill_path,
+                "message": "Test runner executed successfully",
+            }
+        )
+    )
 
     return 0
 

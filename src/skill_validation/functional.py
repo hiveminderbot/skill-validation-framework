@@ -252,9 +252,7 @@ class FunctionalTester:
             duration_ms = (time.time() - start_time) * 1000
 
             # Validate results
-            passed, message = self._validate_result(
-                test_case, exit_code, stdout, stderr
-            )
+            passed, message = self._validate_result(test_case, exit_code, stdout, stderr)
 
             self.results.append(
                 TestResult(
@@ -313,14 +311,18 @@ class FunctionalTester:
 
         # Check expected behavior if defined
         if test_case.expected_behavior:
-            if test_case.expected_behavior not in stdout and test_case.expected_behavior not in stderr:
-                return False, f"Expected behavior '{test_case.expected_behavior}' not found in output"
+            if (
+                test_case.expected_behavior not in stdout
+                and test_case.expected_behavior not in stderr
+            ):
+                return (
+                    False,
+                    f"Expected behavior '{test_case.expected_behavior}' not found in output",
+                )
 
         return True, "Test passed"
 
-    def _compare_outputs(
-        self, expected: dict[str, Any], actual: dict[str, Any]
-    ) -> bool:
+    def _compare_outputs(self, expected: dict[str, Any], actual: dict[str, Any]) -> bool:
         """Compare expected vs actual output (subset matching)."""
         for key, value in expected.items():
             if key not in actual:

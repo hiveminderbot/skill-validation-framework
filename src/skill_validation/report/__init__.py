@@ -68,18 +68,22 @@ class ReportGenerator:
 
         # Add functional tests section if available
         if report.functional_summary:
-            lines.extend([
-                "## Functional Tests",
-                f"- Total Tests: {report.functional_summary.get('total_tests', 0)}",
-                f"- Passed: {report.functional_summary.get('passed', 0)}",
-                f"- Failed: {report.functional_summary.get('failed', 0)}",
-                f"- Pass Rate: {report.functional_summary.get('pass_rate', 0):.1%}",
-                "",
-            ])
+            lines.extend(
+                [
+                    "## Functional Tests",
+                    f"- Total Tests: {report.functional_summary.get('total_tests', 0)}",
+                    f"- Passed: {report.functional_summary.get('passed', 0)}",
+                    f"- Failed: {report.functional_summary.get('failed', 0)}",
+                    f"- Pass Rate: {report.functional_summary.get('pass_rate', 0):.1%}",
+                    "",
+                ]
+            )
 
-        lines.extend([
-            "## Recommendations",
-        ])
+        lines.extend(
+            [
+                "## Recommendations",
+            ]
+        )
 
         for rec in report.recommendations:
             lines.append(f"- {rec}")
@@ -106,7 +110,11 @@ class ReportGenerator:
             sec_pass = "✓" if report.security_summary.get("passed") else "✗"
             val_rate = f"{report.validation_summary.get('pass_rate', 0):.0%}"
             bench_rate = f"{report.benchmark_summary.get('success_rate', 0):.0%}"
-            func_rate = f"{report.functional_summary.get('pass_rate', 0):.0%}" if report.functional_summary else "N/A"
+            func_rate = (
+                f"{report.functional_summary.get('pass_rate', 0):.0%}"
+                if report.functional_summary
+                else "N/A"
+            )
 
             lines.append(
                 f"| {report.skill_name} | {report.overall_score:.1f} | "
