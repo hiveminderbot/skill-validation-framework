@@ -7,6 +7,7 @@ from rich.console import Console
 from rich.table import Table
 
 from skill_validation.benchmark import benchmark_skill
+from skill_validation.functional import run_functional_tests
 from skill_validation.report import ReportGenerator, generate_report
 from skill_validation.security import scan_skill
 from skill_validation.validation import validate_skill
@@ -217,6 +218,7 @@ def report(skill_path: Path, compare_path: Path | None, output_path: Path | None
     _, security_summary = scan_skill(skill_path)
     _, validation_summary = validate_skill(skill_path)
     _, benchmark_summary = benchmark_skill(skill_path)
+    _, functional_summary = run_functional_tests(skill_path)
 
     # Generate report
     report = generate_report(
@@ -225,6 +227,7 @@ def report(skill_path: Path, compare_path: Path | None, output_path: Path | None
         security_summary=security_summary,
         validation_summary=validation_summary,
         benchmark_summary=benchmark_summary,
+        functional_summary=functional_summary,
     )
 
     # Handle comparison
@@ -235,6 +238,7 @@ def report(skill_path: Path, compare_path: Path | None, output_path: Path | None
         _, sec2 = scan_skill(compare_path)
         _, val2 = validate_skill(compare_path)
         _, bench2 = benchmark_skill(compare_path)
+        _, func2 = run_functional_tests(compare_path)
 
         report2 = generate_report(
             skill_name=compare_name,
@@ -242,6 +246,7 @@ def report(skill_path: Path, compare_path: Path | None, output_path: Path | None
             security_summary=sec2,
             validation_summary=val2,
             benchmark_summary=bench2,
+            functional_summary=func2,
         )
 
         generator = ReportGenerator()
@@ -267,3 +272,62 @@ if __name__ == "__main__":
 def main():
     """Entry point for the CLI."""
     cli()
+
+
+@cli.command()
+@click.argument("skill_path", type=click.Path(exists=True, path_type=Path))
+@click.option("--format", "output_format", type=click.Choice(["text", "json"]), default="text")
+@click.option("--output", "output_path", type=click.Path(path_type=Path), default=None)
+def functional(skill_path: Path, output_format: str, output_path: Path | None):
+    """Run functional tests on a skill."""
+    console.print(f"[bold]Running functional tests on {skill_path}...[/bold]")
+
+    results, summary = run_functional_tests(skill_path)
+
+    if output_format == "json":
+        import json as json_lib
+
+        output = json_lib.dumps(
+            {
+                "results": [
+                    {
+                        "test_name": r.test_name,
+                        "passed": r.passed,
+                        "duration_ms": r.duration_ms,
+                        "message": r.message,
+                        "exit_code": r.exit_code,
+                    }
+                    for r in results
+                ],
+                "summary": summary,
+            },
+            indent=2,
+        )
+        if output_path:
+            output_path.write_text(output)
+            console.print(f"[green]Report saved to {output_path}[/green]")
+        else:
+            console.print(output)
+    else:
+        if results:
+            table = Table(title="Functional Test Results")
+            table.add_column("Test")
+            table.add_column("Status")
+            table.add_column("Duration (ms)")
+            table.add_column("Message")
+
+            for result in results:
+                status = "[green]✓[/green]" if result.passed else "[red]✗[/red]"
+                table.add_row(
+                    result.test_name,
+                    status,
+                    f"{result.duration_ms:.1f}",
+                    result.message[:50] + "..." if len(result.message) > 50 else result.message,
+                )
+
+            console.print(table)
+            console.print(f"\nPass rate: {summary['pass_rate']:.1%}")
+            console.print(f"Total duration: {summary['total_duration_ms']:.1f}ms")
+        else:
+            console.print("[yellow]No functional tests found[/yellow]")
+            console.print("Create a tests/ directory with YAML test definitions")

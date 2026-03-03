@@ -16,8 +16,13 @@ class SkillReport:
     security_summary: dict[str, Any]
     validation_summary: dict[str, Any]
     benchmark_summary: dict[str, Any]
-    overall_score: float
-    recommendations: list[str]
+    functional_summary: dict[str, Any] | None = None
+    overall_score: float = 0.0
+    recommendations: list[str] = None
+
+    def __post_init__(self):
+        if self.recommendations is None:
+            self.recommendations = []
 
 
 class ReportGenerator:
@@ -59,8 +64,22 @@ class ReportGenerator:
             f"- Success Rate: {report.benchmark_summary.get('success_rate', 0):.1%}",
             f"- Avg Duration: {report.benchmark_summary.get('avg_duration_ms', 0):.1f}ms",
             "",
-            "## Recommendations",
         ]
+
+        # Add functional tests section if available
+        if report.functional_summary:
+            lines.extend([
+                "## Functional Tests",
+                f"- Total Tests: {report.functional_summary.get('total_tests', 0)}",
+                f"- Passed: {report.functional_summary.get('passed', 0)}",
+                f"- Failed: {report.functional_summary.get('failed', 0)}",
+                f"- Pass Rate: {report.functional_summary.get('pass_rate', 0):.1%}",
+                "",
+            ])
+
+        lines.extend([
+            "## Recommendations",
+        ])
 
         for rec in report.recommendations:
             lines.append(f"- {rec}")
@@ -79,18 +98,19 @@ class ReportGenerator:
             "",
             "## Summary Table",
             "",
-            "| Skill | Overall Score | Security | Validation | Benchmark |",
-            "|-------|---------------|----------|------------|-----------|",
+            "| Skill | Overall Score | Security | Validation | Benchmark | Functional |",
+            "|-------|---------------|----------|------------|-----------|------------|",
         ]
 
         for report in sorted(self.reports, key=lambda r: r.overall_score, reverse=True):
             sec_pass = "✓" if report.security_summary.get("passed") else "✗"
             val_rate = f"{report.validation_summary.get('pass_rate', 0):.0%}"
             bench_rate = f"{report.benchmark_summary.get('success_rate', 0):.0%}"
+            func_rate = f"{report.functional_summary.get('pass_rate', 0):.0%}" if report.functional_summary else "N/A"
 
             lines.append(
                 f"| {report.skill_name} | {report.overall_score:.1f} | "
-                f"{sec_pass} | {val_rate} | {bench_rate} |"
+                f"{sec_pass} | {val_rate} | {bench_rate} | {func_rate} |"
             )
 
         lines.extend(
@@ -112,6 +132,7 @@ class ReportGenerator:
         security_summary: dict[str, Any],
         validation_summary: dict[str, Any],
         benchmark_summary: dict[str, Any],
+        functional_summary: dict[str, Any] | None = None,
     ) -> float:
         """Calculate overall score from 0-10."""
         score = 10.0
@@ -132,6 +153,11 @@ class ReportGenerator:
         bench_rate = benchmark_summary.get("success_rate", 0)
         score -= (1 - bench_rate) * 2
 
+        # Functional test score (max 2 points) if available
+        if functional_summary:
+            func_rate = functional_summary.get("pass_rate", 0)
+            score -= (1 - func_rate) * 2
+
         return max(0, min(10, score))
 
     def generate_recommendations(
@@ -139,6 +165,7 @@ class ReportGenerator:
         security_summary: dict[str, Any],
         validation_summary: dict[str, Any],
         benchmark_summary: dict[str, Any],
+        functional_summary: dict[str, Any] | None = None,
     ) -> list[str]:
         """Generate recommendations based on results."""
         recommendations = []
@@ -165,6 +192,14 @@ class ReportGenerator:
         if bench_rate < 0.5:
             recommendations.append("Fix failing benchmark tasks")
 
+        # Functional test recommendations
+        if functional_summary:
+            func_rate = functional_summary.get("pass_rate", 0)
+            if func_rate < 0.5:
+                recommendations.append("Fix failing functional tests")
+            elif func_rate < 1.0:
+                recommendations.append("Improve functional test coverage")
+
         if not recommendations:
             recommendations.append("No issues found — skill is well-structured")
 
@@ -177,16 +212,17 @@ def generate_report(
     security_summary: dict[str, Any],
     validation_summary: dict[str, Any],
     benchmark_summary: dict[str, Any],
+    functional_summary: dict[str, Any] | None = None,
 ) -> SkillReport:
     """Convenience function to generate a complete report."""
     generator = ReportGenerator()
 
     overall_score = generator.calculate_overall_score(
-        security_summary, validation_summary, benchmark_summary
+        security_summary, validation_summary, benchmark_summary, functional_summary
     )
 
     recommendations = generator.generate_recommendations(
-        security_summary, validation_summary, benchmark_summary
+        security_summary, validation_summary, benchmark_summary, functional_summary
     )
 
     return SkillReport(
@@ -196,6 +232,7 @@ def generate_report(
         security_summary=security_summary,
         validation_summary=validation_summary,
         benchmark_summary=benchmark_summary,
+        functional_summary=functional_summary,
         overall_score=overall_score,
         recommendations=recommendations,
     )

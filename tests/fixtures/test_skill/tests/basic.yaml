@@ -1,0 +1,44 @@
+name: Basic Skill Tests
+description: Core functionality tests for the skill
+
+setup_commands:
+  - echo "Setting up test environment"
+
+cleanup_commands:
+  - echo "Cleaning up test environment"
+
+tests:
+  - name: basic_execution
+    description: Test that the skill runs without errors
+    input:
+      action: test
+      data:
+        value: 42
+    expected_output:
+      status: success
+    timeout_seconds: 10
+
+  - name: invalid_input_handling
+    description: Test that the skill handles invalid input gracefully
+    input:
+      action: invalid
+      data: null
+    expected_behavior: error
+    timeout_seconds: 5
+
+  - name: data_processing
+    description: Test data processing functionality
+    input:
+      action: process
+      data:
+        items:
+          - id: 1
+            name: test
+          - id: 2
+            name: test2
+    expected_output:
+      status: success
+      processed_count: 2
+    timeout_seconds: 15
+    requires_tools:
+      - python3

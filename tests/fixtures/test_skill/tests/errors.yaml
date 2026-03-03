@@ -1,0 +1,17 @@
+name: Error Handling Tests
+description: Tests for error handling and edge cases
+
+tests:
+  - name: empty_input
+    description: Test behavior with empty input
+    input: {}
+    expected_behavior: success
+    timeout_seconds: 5
+
+  - name: timeout_test
+    description: Test that long operations timeout correctly
+    input:
+      action: sleep
+      duration: 60
+    expected_behavior: timeout
+    timeout_seconds: 2
